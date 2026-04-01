@@ -1,15 +1,51 @@
 import { useState, useEffect } from 'react';
-import { PlaySquare, Upload, Loader2, Sparkles, CheckCircle2 } from 'lucide-react';
+import { PlaySquare, Upload, Loader2, Sparkles, CheckCircle2, X, Plus, Image } from 'lucide-react';
 import { authFetch } from '../utils/api';
 
 export default function VideoGenerator() {
     const [prompt, setPrompt] = useState('');
     const [startFrame, setStartFrame] = useState(null);
     const [endFrame, setEndFrame] = useState(null);
+    const [style, setStyle] = useState('default');
+    const [customModifiers, setCustomModifiers] = useState('');
     const [status, setStatus] = useState('idle'); // idle, generating, polling, completed, error
     const [jobId, setJobId] = useState('');
     const [videoUrl, setVideoUrl] = useState('');
     const [model, setModel] = useState('veo-3.1');
+
+    const enhancePrompt = (p, s, c) => {
+        let base = p;
+        switch (s) {
+            case 'cinematic':
+                base = `cinematic lighting, high quality, dramatic, ${p}`;
+                break;
+            case 'ultra':
+                base = `ultra realistic, 8k, highly detailed, ${p}`;
+                break;
+            case 'anime':
+                base = `anime style, vibrant colors, ${p}`;
+                break;
+            case 'custom':
+                base = `${c}, ${p}`;
+                break;
+            default:
+                break;
+        }
+        return base;
+    };
+
+    const handleFileUpload = (e, target) => {
+        const file = e.target.files?.[0] || e.dataTransfer?.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const base64 = event.target.result;
+            if (target === 'start') setStartFrame(base64);
+            if (target === 'end') setEndFrame(base64);
+        };
+        reader.readAsDataURL(file);
+    };
 
     // Polling effect
     useEffect(() => {
@@ -45,9 +81,15 @@ export default function VideoGenerator() {
         setVideoUrl('');
 
         try {
+            const finalPrompt = enhancePrompt(prompt, style, customModifiers);
             const response = await authFetch('/generate-video', {
                 method: 'POST',
-                body: JSON.stringify({ prompt, model }),
+                body: JSON.stringify({ 
+                    prompt: finalPrompt, 
+                    model, 
+                    startFrame, 
+                    endFrame 
+                }),
             });
 
             if (!response.ok) throw new Error('Video generation failed to start');
@@ -112,14 +154,44 @@ export default function VideoGenerator() {
                             </select>
                         </div>
 
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-300">Motion Prompt</label>
-                            <textarea
-                                value={prompt}
-                                onChange={(e) => setPrompt(e.target.value)}
-                                placeholder="Describe the motion and scene... e.g. 'Camera pans slowly across a misty glowing forest...'"
-                                className="w-full h-32 bg-black/50 border border-gray-800 rounded-xl p-4 text-white placeholder-gray-600 focus:outline-none focus:border-neon-green/50 focus:ring-1 focus:ring-neon-green/50 transition-all resize-none"
-                            />
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-300">Visual Style</label>
+                                <select
+                                    value={style}
+                                    onChange={(e) => setStyle(e.target.value)}
+                                    className="w-full bg-black/50 border border-gray-800 rounded-xl p-3 text-white focus:outline-none focus:border-neon-green/50 transition-all appearance-none cursor-pointer drop-shadow-accent"
+                                >
+                                    <option value="default">Default</option>
+                                    <option value="cinematic">Cinematic</option>
+                                    <option value="ultra">Ultra Realistic</option>
+                                    <option value="anime">Anime</option>
+                                    <option value="custom">Custom</option>
+                                </select>
+                            </div>
+
+                            {style === 'custom' && (
+                                <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                                    <label className="text-sm font-medium text-gray-300">Custom Modifiers</label>
+                                    <input
+                                        type="text"
+                                        value={customModifiers}
+                                        onChange={(e) => setCustomModifiers(e.target.value)}
+                                        placeholder="e.g. 'noir style, foggy atmosphere, highly detailed'"
+                                        className="w-full bg-black/50 border border-gray-800 rounded-xl p-3 text-white placeholder-gray-600 focus:outline-none focus:border-neon-green/50 transition-all"
+                                    />
+                                </div>
+                            )}
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-300">Motion Prompt</label>
+                                <textarea
+                                    value={prompt}
+                                    onChange={(e) => setPrompt(e.target.value)}
+                                    placeholder="Describe the motion and scene... e.g. 'Camera pans slowly across a misty glowing forest...'"
+                                    className="w-full h-32 bg-black/50 border border-gray-800 rounded-xl p-4 text-white placeholder-gray-600 focus:outline-none focus:border-neon-green/50 focus:ring-1 focus:ring-neon-green/50 transition-all resize-none"
+                                />
+                            </div>
                         </div>
 
                         <button
