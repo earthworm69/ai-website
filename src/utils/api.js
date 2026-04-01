@@ -1,10 +1,14 @@
 export const BASE_URL = import.meta.env.VITE_API_URL || "https://ai-website-backend-production.up.railway.app";
-console.log("API Base URL:", BASE_URL);
 
 /**
  * Helper to get the auth token from localStorage.
  */
-export const getToken = () => localStorage.getItem("token");
+export const getToken = () => {
+  const token = localStorage.getItem("token");
+  console.log("BASE_URL:", BASE_URL);
+  console.log("TOKEN:", token ? "Token present" : "No token found");
+  return token;
+};
 
 /**
  * Wrapper for authenticated fetch calls.

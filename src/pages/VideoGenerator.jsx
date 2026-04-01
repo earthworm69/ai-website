@@ -15,21 +15,24 @@ export default function VideoGenerator() {
     useEffect(() => {
         let interval;
         if (status === 'polling' && jobId) {
+            console.log(`Starting polling for job: ${jobId}`);
             interval = setInterval(async () => {
                 try {
                     const res = await authFetch(`/video-status/${jobId}`);
                     const data = await res.json();
+                    
+                    console.log(`Polling status for ${jobId}:`, data?.status);
 
-                    if (data.status === 'completed') {
+                    if (data?.status === 'completed' && data?.videoUrl) {
                         setStatus('completed');
                         setVideoUrl(data.videoUrl);
                         clearInterval(interval);
-                    } else if (data.status === 'error') {
+                    } else if (data?.status === 'error') {
                         setStatus('error');
                         clearInterval(interval);
                     }
                 } catch (error) {
-                    console.error(error);
+                    console.error("Polling error:", error);
                 }
             }, 5000);
         }
@@ -47,13 +50,19 @@ export default function VideoGenerator() {
                 body: JSON.stringify({ prompt, model }),
             });
 
-            if (!response.ok) throw new Error('Failed to start video generation');
+            if (!response.ok) throw new Error('Video generation failed to start');
 
             const data = await response.json();
-            setJobId(data.job_id);
-            setStatus('polling');
+            const id = data?.job_id;
+            
+            if (id) {
+                setJobId(id);
+                setStatus('polling');
+            } else {
+                throw new Error('No job ID received from server');
+            }
         } catch (err) {
-            console.error(err);
+            console.error("Video generation start error:", err);
             setStatus('error');
         }
     };

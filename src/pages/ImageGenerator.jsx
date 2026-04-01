@@ -1,3 +1,5 @@
+import React, { useState } from 'react';
+import { Sparkles, Download, Loader2 } from 'lucide-react';
 import { authFetch } from '../utils/api';
 
 export default function ImageGenerator() {
@@ -20,13 +22,19 @@ export default function ImageGenerator() {
                 body: JSON.stringify({ prompt, model }),
             });
 
-            if (!response.ok) throw new Error('Failed to generate image');
+            if (!response.ok) throw new Error('Generation failed: ' + response.statusText);
 
             const data = await response.json();
-            setGeneratedImage(data.imageUrl);
+            const imageUrl = data?.imageUrl;
+            
+            if (imageUrl) {
+                setGeneratedImage(imageUrl);
+            } else {
+                throw new Error('No image URL received from server');
+            }
         } catch (err) {
-            console.error(err);
-            setError('Generation failed. Please check your connection.');
+            console.error("Image generation error:", err);
+            setError(err.message || 'Generation failed. Please check your connection.');
         } finally {
             setIsGenerating(false);
         }
