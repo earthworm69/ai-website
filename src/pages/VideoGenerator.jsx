@@ -151,7 +151,7 @@ export default function VideoGenerator() {
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 <div className="lg:col-span-5 space-y-6">
-                    <div className="glass-panel p-0 rounded-2xl flex flex-col relative overflow-hidden group border border-white/5">
+                    <div className="glass-panel p-0 rounded-2xl flex flex-col relative overflow-visible group border border-white/5">
                         <div className="p-6 pb-0 space-y-6">
                             <div className="grid grid-cols-2 gap-4">
                                 {/* Start Frame Uploader */}
@@ -237,7 +237,7 @@ export default function VideoGenerator() {
                                         <Plus size={16} className={`transition-transform duration-300 ${isModelOpen ? 'rotate-45' : ''}`} />
                                     </div>
                                     {isModelOpen && (
-                                        <div className="absolute top-full left-0 w-full mt-2 bg-[#111] border border-gray-800 rounded-xl overflow-hidden z-50 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+                                        <div className="absolute top-full left-0 w-full mt-2 bg-[#111]/95 backdrop-blur-xl border border-gray-800 rounded-xl overflow-y-auto z-[9999] shadow-2xl animate-in fade-in zoom-in-95 duration-200 max-h-[250px] pb-2">
                                             {[
                                                 { id: 'veo-3.1', name: 'Veo 3.1' },
                                                 { id: 'wan-2.6', name: 'Wan 2.6 Video' },
@@ -266,7 +266,7 @@ export default function VideoGenerator() {
                                         <Plus size={16} className={`transition-transform duration-300 ${isStyleOpen ? 'rotate-45' : ''}`} />
                                     </div>
                                     {isStyleOpen && (
-                                        <div className="absolute top-full left-0 w-full mt-2 bg-[#111] border border-gray-800 rounded-xl overflow-hidden z-50 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+                                        <div className="absolute top-full left-0 w-full mt-2 bg-[#111]/95 backdrop-blur-xl border border-gray-800 rounded-xl overflow-y-auto z-[9999] shadow-2xl animate-in fade-in zoom-in-95 duration-200 max-h-[250px] pb-2">
                                             {['default', 'cinematic', 'ultra', 'anime', 'custom'].map((s) => (
                                                 <div 
                                                     key={s}

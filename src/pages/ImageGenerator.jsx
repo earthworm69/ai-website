@@ -69,7 +69,7 @@ export default function ImageGenerator() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 {/* Input Controls */}
                 <div className="lg:col-span-5 space-y-6">
-                    <div className="glass-panel p-6 rounded-2xl flex flex-col gap-4 relative overflow-hidden group border border-white/5">
+                    <div className="glass-panel p-6 rounded-2xl flex flex-col gap-4 relative overflow-visible group border border-white/5">
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-300">Prompt</label>
                             <textarea
@@ -91,7 +91,7 @@ export default function ImageGenerator() {
                             </div>
                             
                             {isModelOpen && (
-                                <div className="absolute top-full left-0 w-full mt-2 bg-[#111] border border-gray-800 rounded-xl overflow-hidden z-50 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+                                <div className="absolute top-full left-0 w-full mt-2 bg-[#111]/95 backdrop-blur-xl border border-gray-800 rounded-xl overflow-y-auto z-[9999] shadow-2xl animate-in fade-in zoom-in-95 duration-200 max-h-[250px] pb-2">
                                     {models.map((m) => (
                                         <div 
                                             key={m.id}
