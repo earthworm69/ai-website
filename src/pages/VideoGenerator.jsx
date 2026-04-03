@@ -11,7 +11,7 @@ export default function VideoGenerator() {
     const [status, setStatus] = useState('idle'); // idle, generating, polling, completed, error
     const [jobId, setJobId] = useState('');
     const [videoUrl, setVideoUrl] = useState('');
-    const [model, setModel] = useState('veo-3.1');
+    const [model, setModel] = useState('veo');
     const [isModelOpen, setIsModelOpen] = useState(false);
     const [isStyleOpen, setIsStyleOpen] = useState(false);
 
@@ -73,7 +73,7 @@ export default function VideoGenerator() {
                         setStatus('completed');
                         setVideoUrl(data.videoUrl);
                         clearInterval(interval);
-                    } else if (data?.status === 'error') {
+                    } else if (data?.status === 'error' || data?.status === 'failed') {
                         setStatus('error');
                         clearInterval(interval);
                     }
@@ -117,9 +117,14 @@ export default function VideoGenerator() {
                 }),
             });
 
-            if (!response.ok) throw new Error('Video generation failed to start');
-
             const data = await response.json();
+
+            if (!response.ok) {
+                console.error("ERROR:", data);
+                alert(data.error || JSON.stringify(data) || "Generation failed");
+                throw new Error(data.error || 'Video generation failed to start');
+            }
+
             const id = data?.job_id;
             
             if (id) {
@@ -239,10 +244,10 @@ export default function VideoGenerator() {
                                     {isModelOpen && (
                                         <div className="absolute top-full left-0 w-full mt-2 bg-[#111]/95 backdrop-blur-xl border border-gray-800 rounded-xl overflow-y-auto z-[9999] shadow-2xl animate-in fade-in zoom-in-95 duration-200 max-h-[250px] pb-2">
                                             {[
-                                                { id: 'veo-3.1', name: 'Veo 3.1' },
-                                                { id: 'wan-2.6', name: 'Wan 2.6 Video' },
-                                                { id: 'kling-v3-standard', name: 'Kling Video v3 Standard' },
-                                                { id: 'kling-v3-pro', name: 'Kling Video v3 Pro' }
+                                                { id: 'veo', name: 'Veo 3.1' },
+                                                { id: 'wan', name: 'Wan 2.6 Video' },
+                                                { id: 'kling-standard', name: 'Kling Video v3 Standard' },
+                                                { id: 'kling-pro', name: 'Kling Video v3 Pro' }
                                             ].map((m) => (
                                                 <div 
                                                     key={m.id}

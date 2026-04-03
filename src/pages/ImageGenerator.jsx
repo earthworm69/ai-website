@@ -4,7 +4,7 @@ import { authFetch } from '../utils/api';
 
 export default function ImageGenerator() {
     const [prompt, setPrompt] = useState('');
-    const [model, setModel] = useState('gemini-3-pro-image');
+    const [model, setModel] = useState('gemini-pro');
     const [isGenerating, setIsGenerating] = useState(false);
     const [generatedImage, setGeneratedImage] = useState(null);
     const [error, setError] = useState('');
@@ -22,14 +22,20 @@ export default function ImageGenerator() {
         try {
             console.log("Generating image with prompt:", prompt);
             console.log("Model:", model);
+
             const response = await authFetch('/generate-image', {
                 method: 'POST',
                 body: JSON.stringify({ prompt, model }),
             });
 
-            if (!response.ok) throw new Error('Generation failed: ' + response.statusText);
-
             const data = await response.json();
+
+            if (!response.ok) {
+                console.error("ERROR:", data);
+                alert(data.error || JSON.stringify(data) || "Generation failed");
+                throw new Error(data.error || 'Generation failed');
+            }
+
             const imageUrl = data?.imageUrl;
             
             if (imageUrl) {
@@ -54,9 +60,9 @@ export default function ImageGenerator() {
     };
 
     const models = [
-        { id: 'gemini-3-pro-image', name: 'Gemini 3 Pro (Nano Banana Pro)' },
-        { id: 'gemini-3.1-flash-image', name: 'Gemini 3.1 Flash (Nano Banana 2)' },
-        { id: 'qwen-image', name: 'Qwen Image' }
+        { id: 'gemini-pro', name: 'Gemini 3 Pro (Nano Banana Pro)' },
+        { id: 'gemini-flash', name: 'Gemini 3.1 Flash (Nano Banana 2)' },
+        { id: 'qwen', name: 'Qwen Image' }
     ];
 
     return (
