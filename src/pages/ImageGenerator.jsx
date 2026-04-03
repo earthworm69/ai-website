@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, Download, Loader2 } from 'lucide-react';
+import { Sparkles, Download, Loader2, Plus } from 'lucide-react';
 import { authFetch } from '../utils/api';
 
 export default function ImageGenerator() {
@@ -8,6 +8,9 @@ export default function ImageGenerator() {
     const [isGenerating, setIsGenerating] = useState(false);
     const [generatedImage, setGeneratedImage] = useState(null);
     const [error, setError] = useState('');
+    const [isModelOpen, setIsModelOpen] = useState(false);
+
+    console.log("Selected Model:", model);
 
     const handleGenerate = async () => {
         if (!prompt.trim()) return;
@@ -17,6 +20,8 @@ export default function ImageGenerator() {
         setGeneratedImage(null);
 
         try {
+            console.log("Generating image with prompt:", prompt);
+            console.log("Model:", model);
             const response = await authFetch('/generate-image', {
                 method: 'POST',
                 body: JSON.stringify({ prompt, model }),
@@ -48,19 +53,23 @@ export default function ImageGenerator() {
         alert('Image saved to library!');
     };
 
+    const models = [
+        { id: 'gemini-3-pro-image', name: 'Gemini 3 Pro (Nano Banana Pro)' },
+        { id: 'gemini-3.1-flash-image', name: 'Gemini 3.1 Flash (Nano Banana 2)' },
+        { id: 'qwen-image', name: 'Qwen Image' }
+    ];
+
     return (
         <div className="max-w-5xl mx-auto flex flex-col gap-8">
             <header>
-                <h1 className="text-4xl font-black mb-2 tracking-tighter premium-title">AI CreatorStudio</h1>
+                <h1 className="text-4xl font-black mb-2 tracking-tighter premium-title text-transparent bg-clip-text bg-gradient-to-r from-neon-green to-emerald-400">AI CreatorStudio</h1>
                 <p className="text-gray-400">Transform your imagination into visual reality using state-of-the-art AI.</p>
             </header>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 {/* Input Controls */}
                 <div className="lg:col-span-5 space-y-6">
-                    <div className="glass-panel p-6 rounded-2xl flex flex-col gap-4 relative overflow-hidden group">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-neon-green to-transparent opacity-50 group-hover:opacity-100 transition-opacity"></div>
-
+                    <div className="glass-panel p-6 rounded-2xl flex flex-col gap-4 relative overflow-hidden group border border-white/5">
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-300">Prompt</label>
                             <textarea
@@ -71,18 +80,33 @@ export default function ImageGenerator() {
                             />
                         </div>
 
-                        <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-300">AI Model</label>
-              <select
-                value={model}
-                onChange={(e) => setModel(e.target.value)}
-                className="w-full bg-black/50 border border-gray-800 rounded-xl p-3 text-white focus:outline-none focus:border-neon-green/50 transition-all appearance-none cursor-pointer"
-              >
-                <option value="gemini-3-pro-image">Gemini 3 Pro (Nano Banana Pro)</option>
-                <option value="gemini-3.1-flash-image">Gemini 3.1 Flash (Nano Banana 2)</option>
-                <option value="qwen-image">Qwen Image</option>
-              </select>
-            </div>
+                        <div className="space-y-2 relative">
+                            <label className="text-sm font-medium text-gray-300">AI Model</label>
+                            <div 
+                                onClick={() => setIsModelOpen(!isModelOpen)}
+                                className="w-full bg-black/50 border border-gray-800 rounded-xl p-3 text-white flex justify-between items-center cursor-pointer hover:border-neon-green/30 transition-all"
+                            >
+                                <span>{models.find(m => m.id === model)?.name || 'Select Model'}</span>
+                                <Plus size={16} className={`transition-transform duration-300 ${isModelOpen ? 'rotate-45' : ''}`} />
+                            </div>
+                            
+                            {isModelOpen && (
+                                <div className="absolute top-full left-0 w-full mt-2 bg-[#111] border border-gray-800 rounded-xl overflow-hidden z-50 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+                                    {models.map((m) => (
+                                        <div 
+                                            key={m.id}
+                                            onClick={() => {
+                                                setModel(m.id);
+                                                setIsModelOpen(false);
+                                            }}
+                                            className={`p-3 hover:bg-neon-green/10 cursor-pointer transition-colors text-sm ${model === m.id ? 'text-neon-green bg-neon-green/5' : 'text-gray-400'}`}
+                                        >
+                                            {m.name}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                         <button
                             onClick={handleGenerate}
                             disabled={isGenerating || !prompt.trim()}
